@@ -6,9 +6,14 @@ var template = require('./template.js');
 var path = require('path');
 var sanitizeHtml = require('sanitize-html');
 
+
 //express
 var express = require('express');
 var app = express();
+
+//body-parser
+var bodyParser = require('body-parser');
+app.use(bodyParser.urlencoded({ extended : false}));
 
 app.get('/', function(request, response){
     fs.readdir('./data', function(error, filelist){
@@ -52,8 +57,15 @@ app.post('/topic/create_process', function(request, response){
         response.redirect(`/topic/${title}`);
     });
 });
+app.post(`/topic/delete_process`, function(request, response){
+    var post = request.body;
+    var id = post.id;
+    fs.unlink(`data/${id}`, function(error){
+        response.redirect(`/`);
+    });
+});
 app.get(`/topic/:pageId`, function(request, response, next){
-    //id값이 있는 경우 코드
+    //id값이 있는 경우 코드 //코드 순서 되게 중요!!!
     fs.readdir('./data', function(error, filelist){
         var fileReadId = path.parse(request.params.pageId).base;
 
@@ -66,9 +78,9 @@ app.get(`/topic/:pageId`, function(request, response, next){
                 var html = template.HTML(title, list,
                     `<h2>${title}</h2>${description}`,
                     `
-                    <a href="/page/create">createPage</a>
-                    <a href="/page/update/${title}">update</a>
-                    <form action="/page/delete_process" method="post">
+                    <a href="/topic/create">createPage</a>
+                    <a href="/topic/update/${title}">update</a>
+                    <form action="/topic/delete_process" method="post">
                         <input type="hidden" name="id" value="${title}">
                         <input type="submit" value="delete">
                     </form>
