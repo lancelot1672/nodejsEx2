@@ -24,7 +24,7 @@ app.get('/', function(request, response){
         var list = template.list(filelist);
         var html = template.HTML(title, list,
             `<h2>${title}</h2>${description}`,
-            `<a href="/create">create</a>`
+            `<a href="/topic/create">createPage</a>`
             );
             response.send(html);
     })
@@ -64,6 +64,50 @@ app.post(`/topic/delete_process`, function(request, response){
         response.redirect(`/`);
     });
 });
+app.post('/topic/update_process', function(request, response){
+    var post = request.body;
+    var id = post.id;       // 기존 파일명
+    var title = post.title; // 새 파일 명
+    var description = post.description; // 파일 내용
+    //파일 수정
+    fs.rename(`data/${id}`, `data/${title}`, function(error){
+        fs.writeFile(`data/${title}`, description, 'utf-8', function(err){
+            response.redirect(`/topic/${title}`);
+        });
+    });
+});
+app.get('/topic/update/:pageId', function(request, response){
+    fs.readdir('./data', function(error, filelist){
+        var filename = path.parse(request.params.pageId).base;
+
+        fs.readFile(`data/${filename}`, function(error, description){
+            if(error){
+                next(error);
+            }else{
+                var title = request.params.pageId;
+                var list = template.list(filelist);
+                var html = template.HTML(title, list,
+                    `<form action = "/topic/update_process" method="post">
+                        <input type="hidden" name="id" value="${title}">
+                        <p><input type="text" name="title" placeholder="title" value="${title}">
+                        <p>
+                            <textarea name="description" placeholder="description">${description}</textarea>
+                        </p>
+                        <p>
+                            <input type="submit">
+                        </p>
+                    </form>
+                    `,
+                    `<a href="/page/create">createPage</a> 
+                    <br> 
+                    <a href="/page/update/${title}">update</a>`
+                    );
+                response.send(html);
+            }
+        });
+    });
+});
+
 app.get(`/topic/:pageId`, function(request, response, next){
     //id값이 있는 경우 코드 //코드 순서 되게 중요!!!
     fs.readdir('./data', function(error, filelist){
