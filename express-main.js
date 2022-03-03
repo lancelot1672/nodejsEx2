@@ -18,7 +18,7 @@ var FileStore = require('session-file-store')(session);
 app.use(session({
     secret : 'keyboard cat',
     resave : false,
-    saveUninitialized : true,
+    saveUninitialized : false,
     store:new FileStore()
 }));
 
@@ -42,20 +42,32 @@ var authRouter = require('./route/auth/auth.js');
 app.use('/auth', authRouter);
 
 
+
+
+var passport = require('./lib/passport.js')(app);
+
+
+app.post('/auth/login_process',
+    passport.authenticate('local', {
+        successRedirect: '/',
+        failureRedirect: '/auth/login'
+}));
+
 app.get('/', function(request, response){
+        console.log('/', request.user);
+        
+        var title = 'Welcome';
+        var description = 'Hello, Node.js';
+        var authStatusUi = auth.StatusUi(request, response);
     
-    var title = 'Welcome';
-    var description = 'Hello, Node.js';
-    var authStatusUi = auth.StatusUi(request, response);
-
-    var list = template.list(request.list);
-    var html = template.HTML(title, list,
-        `<h2>${title}</h2>${description}`,
-        `<a href="/topic/create">createPage</a>`,
-        authStatusUi
-        );
-        response.send(html);
-
+        var list = template.list(request.list);
+        var html = template.HTML(title, list,
+            `<h2>${title}</h2>${description}`,
+            `<a href="/topic/create">createPage</a>`,
+            authStatusUi
+            );
+            response.send(html);
+    
 });
 
 app.listen(3000, function(){
