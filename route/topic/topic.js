@@ -87,7 +87,8 @@ router.get('/update/:pageId', function(request, response){
 router.get(`/:pageId`, function(request, response, next){
     //id값이 있는 경우 코드 //코드 순서 되게 중요!!!
     var fileReadId = path.parse(request.params.pageId).base;
-
+    console.log(request.user);
+    
     fs.readFile(`data/${fileReadId}`, function(error, description){
         if(error){
             next(error);

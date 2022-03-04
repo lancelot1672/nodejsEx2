@@ -33,6 +33,7 @@ app.use(function(request, response, next){
         next();
     });
 });
+var passport = require('./lib/passport.js')(app);
 
 //router
 var topicRouter = require('./route/topic/topic.js');
@@ -43,8 +44,6 @@ app.use('/auth', authRouter);
 
 
 
-
-var passport = require('./lib/passport.js')(app);
 
 
 app.post('/auth/login_process',
